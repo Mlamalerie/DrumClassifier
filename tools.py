@@ -64,4 +64,4 @@ def play_audio(file_path, sr=SAMPLE_RATE):
         y, sr = load_audio_file(file_path, sr=sr)
         return ipd.display(ipd.Audio(y, rate=sr))
     else:
-        return ipd.display(ipd.Audio(file_path))
+        return ipd.display(ipd.Audio(file_path, rate=sr))
