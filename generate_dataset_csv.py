@@ -30,7 +30,7 @@ def get_all_audios_files(dir_path, audio_extensions=[".wav", ".mp3", ".ogg", ".f
     return files
 
 
-def get_df_audio_files(dir_path, audio_extensions=[".wav", ".mp3", ".ogg", ".flac"]):
+def get_df_audio_files(dir_path, audio_extensions=[".wav", ".mp3", ".ogg", ".flac", ".aiff", ".aif"]):
     # get all audios files
     files = get_all_audios_files(dir_path, audio_extensions)
     # get file : path, name, extension and class (folder name)
@@ -53,25 +53,37 @@ def add_split_column(df, test_size=0.2, random_state=123, grouping_column="class
 
 def generate_dataset_csv(dir_path: str, output_csv_path: str, test_size: float = TEST_SIZE,
                          random_state: int = RANDOM_STATE):
+
+    print("Generate dataset csv file ...")
     # create a dataframe
     df = get_df_audio_files(dir_path)
 
     # add split column into train and test
     df = add_split_column(df, test_size, random_state)
 
+    # print info df
+
+    print("> Dataset shape: {}".format(df.shape))
+    print("> Dataset columns: {}".format(df.columns))
+    print("> Dataset classes: {}".format(df["class"].unique()))
+    print("> Dataset info:")
+    # count the number of files per class and split
+    print(df.groupby(["class", "split"]).count()["file_path"])
+
     # save the dataframe to csv
     df.to_csv(output_csv_path, index=False)
+
+    # print output
+    print("> Saved to: {}".format(output_csv_path))
 
     return df
 
 
 def main():
-    print("Generate dataset csv file ...", end=" ")
+
     # generate the dataset csv file
     output_csv_path = os.path.join(SOUNDS_DATASET_PATH, "dataset.csv")
     _ = generate_dataset_csv(SOUNDS_DATASET_PATH, output_csv_path)
-    print("Done.\n> dataset csv file saved to: {}".format(output_csv_path))
-
 
 if __name__ == "__main__":
     main()
