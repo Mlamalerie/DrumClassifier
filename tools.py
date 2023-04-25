@@ -9,7 +9,19 @@ import os
 import librosa
 import soundfile as sf
 
-import numpy as np
+def generate_chunks(lst, chunk_size):
+    """
+    Génère des chunks (morceaux) d'une liste en fonction d'une taille de chunk donnée.
+
+    Args:
+        lst (list): Liste d'éléments à diviser en chunks.
+        chunk_size (int): Taille de chaque chunk.
+
+    Yields:
+        list: Chunk (morceau) de la liste d'éléments.
+    """
+    for i in range(0, len(lst), chunk_size):
+        yield lst[i:i + chunk_size]
 
 def pad_signal(y: np.ndarray, target_length: int) -> np.ndarray:
     """
@@ -55,13 +67,24 @@ def load_audio_file(file_path: str, sr: int = SAMPLE_RATE) -> Tuple[np.ndarray, 
         ok = True
     return (y, sr) if ok else (None, None)
 
-def play_audio(file_path, sr=SAMPLE_RATE):
+def play_audio(file_path: str = None, sr=SAMPLE_RATE, y=None):
 
-    ext = file_path.split('.')[-1]
-    # change file_path : keep only parent folder / file name
-    print(">", os.path.join(os.path.basename(os.path.dirname(file_path)), os.path.basename(file_path)))
-    if ext in ['flac']:
-        y, sr = load_audio_file(file_path, sr=sr)
+    if file_path is None and y is None:
+        raise ValueError("file_path ou y doit être spécifié.")
+    if file_path is not None and y is not None:
+        raise ValueError("file_path et y ne peuvent pas être spécifiés en même temps.")
+    if file_path is not None:
+        # get extension
+
+        ext = file_path.split('.')[-1]
+        # change file_path : keep only parent folder / file name
+        print(">", os.path.join(os.path.basename(os.path.dirname(file_path)), os.path.basename(file_path)))
+        if ext in ['flac']:
+            y, sr = load_audio_file(file_path, sr=sr)
+            return ipd.display(ipd.Audio(y, rate=sr))
+        else:
+            return ipd.display(ipd.Audio(file_path, rate=sr))
+    elif y is not None:
         return ipd.display(ipd.Audio(y, rate=sr))
-    else:
-        return ipd.display(ipd.Audio(file_path, rate=sr))
+
+
