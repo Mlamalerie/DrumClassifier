@@ -2,6 +2,7 @@ from params import SOUNDS_DATASET_PATH
 import os
 from glob import glob
 import pandas as pd
+from tools import get_all_audios_files
 from sklearn.model_selection import train_test_split
 
 TEST_SIZE = 0.15
@@ -22,12 +23,7 @@ print(get_file_info(test_audio_path))
 
 # %%
 
-# get all audios files in the dataset (wav, mp3, ...) use glob
-def get_all_audios_files(dir_path, audio_extensions=[".wav", ".mp3", ".ogg", ".flac"]):
-    files = []
-    for extension in audio_extensions:
-        files.extend(glob(os.path.join(dir_path, "**", "*" + extension), recursive=True))
-    return files
+
 
 
 def get_df_audio_files(dir_path, audio_extensions=[".wav", ".mp3", ".ogg", ".flac", ".aiff", ".aif"]):

@@ -8,6 +8,44 @@ import numpy as np
 import os
 import librosa
 import soundfile as sf
+from glob import glob
+
+# get all audios files in the dataset (wav, mp3, ...) use glob
+def get_all_audios_files(dir_path, audio_extensions=[".wav", ".mp3", ".ogg", ".flac"]):
+    files = []
+    for extension in audio_extensions:
+        files.extend(glob(os.path.join(dir_path, "**", "*" + extension), recursive=True))
+    return files
+
+def get_columns_by_prefix_(columns_list: list) -> dict:
+    """
+    Récupère les colonnes par préfixe à partir d'une liste de colonnes.
+
+    Args:
+        columns_list (list): Liste de colonnes.
+
+    Returns:
+        dict: Dictionnaire contenant les préfixes comme clés et les colonnes associées comme valeurs.
+    """
+    prefixes = set([col.split('_')[0] for col in columns_list])
+    columns_by_prefix = {}
+    for prefix in prefixes:
+        columns_by_prefix[prefix] = [col for col in columns_list if col.startswith(prefix)]
+    return columns_by_prefix
+
+
+def get_columns_starts_with(columns_list: list, prefix) -> dict:
+    """
+    Récupère les colonnes par préfixe à partir d'une liste de colonnes.
+
+    Args:
+        columns_list (list): Liste de colonnes.
+
+    Returns:
+        dict: Dictionnaire contenant les préfixes comme clés et les colonnes associées comme valeurs.
+    """
+
+    return [col for col in columns_list if col.startswith(prefix)]
 
 def generate_chunks(lst, chunk_size):
     """
@@ -67,19 +105,22 @@ def load_audio_file(file_path: str, sr: int = SAMPLE_RATE) -> Tuple[np.ndarray, 
         ok = True
     return (y, sr) if ok else (None, None)
 
-def play_audio(file_path: str = None, sr=SAMPLE_RATE, y=None):
+def play_audio(file_path: str = None, sr=SAMPLE_RATE, y=None, title=None):
 
     if file_path is None and y is None:
         raise ValueError("file_path ou y doit être spécifié.")
     if file_path is not None and y is not None:
         raise ValueError("file_path et y ne peuvent pas être spécifiés en même temps.")
+    title = os.path.join(os.path.basename(os.path.dirname(file_path)), os.path.basename(file_path)) if title is None else title
+
+    print(">", title)
     if file_path is not None:
         # get extension
 
         ext = file_path.split('.')[-1]
         # change file_path : keep only parent folder / file name
-        print(">", os.path.join(os.path.basename(os.path.dirname(file_path)), os.path.basename(file_path)))
-        if ext in ['flac']:
+
+        if ext in ['flac',"aif","aiff"]:
             y, sr = load_audio_file(file_path, sr=sr)
             return ipd.display(ipd.Audio(y, rate=sr))
         else:

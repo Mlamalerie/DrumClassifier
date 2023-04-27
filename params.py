@@ -1,4 +1,6 @@
 SOUNDS_DATASET_PATH = "G:\Shared drives\PFE - ING3 Mlamali\DrumClassifier - Sounds Dataset"
+AIRS_PATH = "G:\Shared drives\PFE - ING3 Mlamali\DrumClassifier - Acoustic Impulse Responses"
+
 SAMPLE_RATE = 44100
 
 DRUM_NAMES = ['Kick',
