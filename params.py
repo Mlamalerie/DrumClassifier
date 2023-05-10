@@ -19,6 +19,9 @@ DRUM_NAMES = ['Kick',
                'Shaker',
                'Metal']
 
+HIGH_PITCHED_DRUMS = ["Triangle", "Shaker", "Hat Open (Cymbal)", "Hat Closed (Cymbal)", "Crash (Cymbal)", "Ride (Cymbal)"]
+LOW_PITCHED_DRUMS = ['Kick', 'Tom', '808']
+
 CLASS_COLORS = {
     'Metal': '#6a3d9a',  # Purple
     'Conga': '#1f78b4',  # Blue

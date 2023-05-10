@@ -7,6 +7,9 @@ from tqdm import tqdm
 import soundfile as sf
 import re
 
+import warnings
+warnings.filterwarnings('ignore')
+
 
 def save_audio(y, sr, output_path):
     """
