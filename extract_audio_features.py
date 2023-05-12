@@ -421,6 +421,7 @@ def extract_features(y: np.ndarray, sr: int,
                         extract_attack_time : bool = True,
                         extract_pitch : bool = True,
                         extract_mfcc : bool = True,
+                        extract_spec_cent : bool = True,
                         extract_spec_bw : bool = True,
                         extract_spec_flatness : bool = True,
                         extract_spec_rolloff : bool = True,
@@ -438,6 +439,7 @@ def extract_features(y: np.ndarray, sr: int,
         extract_attack_time (bool, optional): Whether to extract the attack time. Defaults to True.
         extract_pitch (bool, optional): Whether to extract the pitch. Defaults to True.
         extract_mfcc (bool, optional): Whether to extract the MFCC. Defaults to True.
+        extract_spec_cent (bool, optional): Whether to extract the spectral centroid. Defaults to True.
         extract_spec_bw (bool, optional): Whether to extract the spectral bandwidth. Defaults to True.
         extract_spec_flatness (bool, optional): Whether to extract the spectral flatness. Defaults to True.
         extract_spec_rolloff (bool, optional): Whether to extract the spectral rolloff. Defaults to True.
@@ -467,6 +469,8 @@ def extract_features(y: np.ndarray, sr: int,
         features["pitch"] = get_pitch(y=y, sr=sr)
     if extract_mfcc:
         features.update(flatten_dict(get_mfcc_stats(y=y, sr=sr), start=1))
+    if extract_spec_cent:
+        features.update(get_spectral_centroid(y=y, sr=sr)[0])
     if extract_spec_bw:
         features.update(get_spectral_bandwidth(y=y, sr=sr)[0])
     if extract_spec_flatness:

@@ -15,11 +15,10 @@ DRUM_NAMES = ['Kick',
                'Snare',
                'Conga',
                'Bell',
-               'Triangle',
                'Shaker',
                'Metal']
 
-HIGH_PITCHED_DRUMS = ["Triangle", "Shaker", "Hat Open (Cymbal)", "Hat Closed (Cymbal)", "Crash (Cymbal)", "Ride (Cymbal)"]
+HIGH_PITCHED_DRUMS = ["Shaker", "Hat Open (Cymbal)", "Hat Closed (Cymbal)", "Crash (Cymbal)", "Ride (Cymbal)"]
 LOW_PITCHED_DRUMS = ['Kick', 'Tom', '808']
 
 CLASS_COLORS = {
@@ -37,7 +36,6 @@ CLASS_COLORS = {
     'Clap': '#fb9a99',  # Light red
     'Snap': '#b2df8a',  # Light green
     'Shaker': '#cab2d6',  # Light purple
-    'Triangle': '#fdbf6f',  # Light orange
 }
 
 DRUM_ALIAS_3 = {
@@ -53,7 +51,6 @@ DRUM_ALIAS_3 = {
     'Snare': 'SNR',
     'Conga': 'CNG',
     'Bell': 'BEL',
-    'Triangle': 'TRI',
     'Shaker': 'SHA',
     'Metal': 'MET'
 }
@@ -71,7 +68,6 @@ DRUM_ALIAS_2 = {
     'Snare': 'SR',
     'Conga': 'CG',
     'Bell': 'BL',
-    'Triangle': 'TR',
     'Shaker': 'SH',
     'Metal': 'MT'
 }

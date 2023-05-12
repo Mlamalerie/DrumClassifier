@@ -11,3 +11,4 @@ soundfile~=0.12.1
 joblib~=1.2.0
 audiomentations~=0.29.0
 scikit-learn~=1.2.2
+plotly

@@ -120,7 +120,7 @@ def compute_df_similarities(df_X: pd.DataFrame, metric: str = "euclidean", thres
     return df_similarities
 
 
-def get_outliers_iqr_per_class(df, column, class_column, multiplier=1.75):
+def get_outliers_iqr_per_class(df, column, class_column, multiplier=1.5):
     outliers_indices = []
 
     # Divisez le dataframe en sous-groupes en fonction des classes.
@@ -143,7 +143,7 @@ def get_outliers_iqr_per_class(df, column, class_column, multiplier=1.75):
 def main():
     # LOAD DATASET -------------------------------------------------------------
     print("*" * 20, "LOAD DATASET", "*" * 20)
-    now_day_str = "20230509"
+    now_day_str = "20230511"
     dataset_csv_path = os.path.join(SOUNDS_DATASET_PATH, f'dataset_features_{now_day_str}.csv')
     if not os.path.exists(dataset_csv_path):
         raise Exception(f"Dataset csv file not found: {dataset_csv_path}")

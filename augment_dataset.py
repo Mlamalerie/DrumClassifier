@@ -83,7 +83,7 @@ MIN_FILTER_FREQ, MAX_FILTER_FREQ = 40, 1000
 
 # DATASET AUGMENTATIONS PARAMETERS
 
-TARGET_NUMBER_PER_CLASS = 500
+TARGET_NUMBER_PER_CLASS = 600
 
 
 def augment_audio(y, sample_rate,
@@ -322,7 +322,7 @@ def task_augment_file_row(orig_file_path):
 # %%
 def main():
     # LOAD DATASET (with selected features) -------------------------
-    now_day_str = "20230509"
+    now_day_str = "20230511"
     dataset_csv_path = os.path.join(SOUNDS_DATASET_PATH, f'dataset_features_cleaned_{now_day_str}.csv')
     if not os.path.exists(dataset_csv_path):
         raise FileNotFoundError(f"Dataset file not found: {dataset_csv_path}")
@@ -367,11 +367,15 @@ def main():
 
         if ask_confirmation():
             # DELETE ALL AUGMENTED FILES
-            delete_augmented_files(SOUNDS_DATASET_PATH)
-            sleep(45)
-            delete_augmented_files(SOUNDS_DATASET_PATH)
-            sleep(15)
-            delete_augmented_files(SOUNDS_DATASET_PATH)
+            if delete_augmented_files(SOUNDS_DATASET_PATH) > 0:
+                sleep(45)
+                delete_augmented_files(SOUNDS_DATASET_PATH)
+                sleep(15)
+                delete_augmented_files(SOUNDS_DATASET_PATH)
+
+            if not ask_confirmation():
+                print("Aborting...")
+                return
 
             # AUGMENT FILES
             augmented_row_dicts = []
@@ -405,7 +409,7 @@ def main():
 
             # save augmented dataset
             output_augmented_dataset_csv_path = os.path.join(SOUNDS_DATASET_PATH,
-                                                             f'dataset_features_cleaned_augmented_{now_day_str}.csv')
+                                                             f'dataset_features_cleaned_augmented_{TARGET_NUMBER_PER_CLASS}_{now_day_str}.csv')
             df_augmented_final.to_csv(output_augmented_dataset_csv_path, index=True)
     return 1
 

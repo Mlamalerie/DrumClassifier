@@ -111,6 +111,10 @@ def play_audio(file_path: str = None, sr=SAMPLE_RATE, y=None, title=None):
         raise ValueError("file_path ou y doit être spécifié.")
     if file_path is not None and y is not None:
         raise ValueError("file_path et y ne peuvent pas être spécifiés en même temps.")
+
+    if not os.path.exists(file_path):
+        raise FileNotFoundError(f"Le fichier {file_path} n'existe pas.")
+
     title = os.path.join(os.path.basename(os.path.dirname(file_path)), os.path.basename(file_path)) if title is None else title
 
     print(">", title)
