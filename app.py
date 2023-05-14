@@ -2,6 +2,7 @@ import os
 import zipfile
 import tempfile
 import pandas as pd
+import numpy as np
 import streamlit as st
 from pydub import AudioSegment
 from IPython.display import Audio
@@ -39,6 +40,7 @@ st.sidebar.success("This is a **beta** version of the app.")
 if not "ok_submit" in st.session_state:
     st.session_state.ok_submit = False
 
+
 # =======
 #   Utils
 # =======
@@ -59,7 +61,7 @@ def load_ml_model(model_path):
                 break
 
     model = items[0]
-    print(model,"#######################",type(model))
+    print(model, "#######################", type(model))
     scaler = items[1]
     features_columns = items[2]
     print(f"> '{model_path}' loaded successfully")
@@ -68,6 +70,7 @@ def load_ml_model(model_path):
     print(f">>> {len(features_columns)} Features columns: {features_columns[:5]} ... {features_columns[-5:]}")
 
     return model, scaler, features_columns
+
 
 RF_MODEL_PATH = './models/RandomForest data[aug=1, s=10291, s_per_class=[596,1283], n_feats=98, feat_select=0] 20230513_10.pkl'
 SVC_MODEL_PATH = './models/SVC data[aug=1, s=10291, s_per_class=[596,1283], n_feats=98, feat_select=0] 20230513_05.pkl'
@@ -94,14 +97,16 @@ FEATURES_COLUMNS_MAPPING = {
     'LGBM': features_columns_lgbm,
 }
 
+
 @st.cache(allow_output_mutation=True)
 def load_audio(file_path):
     y, sr = load_audio_file(file_path=file_path)
     return y, sr
 
+
 # Créer dataset à partir d'une liste de fichiers audio
 @st.cache_resource(show_spinner=True)
-def create_dataset_from_audio_files(audio_files : list):
+def create_dataset_from_audio_files(audio_files: list):
     # result dataset : columns = file_path, file_name
     file_path_series = pd.Series(audio_files)
     file_name_series = file_path_series.apply(lambda x: os.path.basename(x).split('.')[0])
@@ -113,6 +118,7 @@ def create_dataset_from_audio_files(audio_files : list):
 
     return dataset
 
+
 def main():
     uploaded_file = st.file_uploader("Choose a ZIP file", type="zip")
 
@@ -122,13 +128,13 @@ def main():
                 zip_ref.extractall(temp_dir)
 
             # create columns 20% - 80%
-            col1,col2 = st.columns([0.2,0.8])
+            col1, col2 = st.columns([0.2, 0.8])
             if temp_dir is not None:
                 # get all audios files in the dataset (wav, mp3, ...) use glob
                 audios = get_all_audios_files(temp_dir)
                 # display count of audios files
                 if len(audios) == 0:
-                    st.error("No audio files found",icon='📂')
+                    st.error("No audio files found", icon='📂')
                 else:
                     col1.metric(label="📂 Audio files found.", value=len(audios))
 
@@ -139,7 +145,6 @@ def main():
                     # submit button
                     ok_button = col1.button("Predict", key="predict")
                     st.session_state.ok_submit = ok_button
-
 
             if st.session_state.ok_submit and len(audios) > 0:
                 model = MODEL_MAPPING[model_name]
@@ -158,39 +163,58 @@ def main():
                 with st.expander("Show dataset"):
                     # display dataset
                     # features selection : keep only features columns which are in the model
-                    st.write("dataset",dataset.shape, dataset.columns.tolist())
+                    st.write("dataset", dataset.shape, dataset.columns.tolist())
                     st.dataframe(dataset.head())
                     X = dataset[FEATURES_COLUMNS_MAPPING[model_name]]
                     # scale dataset
                     X = scaler.transform(X)
-                    st.write("X",X.shape)
+                    st.write("X", X.shape)
                     st.write(X)
 
-                # make predictions
+                # make predictions and probabilities
                 with st.spinner("Making predictions..."):
                     predictions = model.predict(X)
-                
-                # concatenate predictions to dataset
-                dataset['predictions'] = predictions
+                    probabilities = model.predict_proba(X)  # get probabilities
+
+                # new code...
+                confidence_threshold = 0.6  # set your confidence threshold here
+                top_n = 2  # set the number of top predictions you want to show
+
+                # for each prediction, get the top 2 classes and their probabilities
+                top_predictions = []
+                for proba in probabilities:
+                    # get top 2 predictions
+                    top_indices = np.argsort(proba)[-top_n:]
+                    top_probs = proba[top_indices]
+                    top_classes = model.classes_[top_indices]
+                    # if the highest probability is less than the threshold, show top 2 predictions
+                    if top_probs[-1] < confidence_threshold:
+                        top_prediction = f"{top_classes[-1]} ({top_probs[-1] * 100:.0f}%), {top_classes[-2]} ({top_probs[-2] * 100:.0f}%)"
+                    else:
+                        top_prediction = f"{top_classes[-1]} ({top_probs[-1] * 100:.0f}%)"
+                    top_predictions.append(top_prediction)
+
+                # concatenate top_predictions to dataset
+                dataset['top_predictions'] = top_predictions
 
                 # display predictions in a grid
                 st.subheader("Predictions 🔮")
-                st.caption(f"*file_name* ⇢ **prediction**")
-                n_cols = 3
+                st.caption(f"Showing top {top_n} predictions with confidence > {confidence_threshold}")
+                st.caption(f"*file_name* ⇢ **top_prediction**")
+
+                n_cols = 2
                 cols = st.columns(n_cols)
-                for e,(idx_row, row) in enumerate(dataset.iterrows()):
+                for e, (idx_row, row) in enumerate(dataset.iterrows()):
 
                     audio_file = row['file_path']
                     audio_name = row['file_name']
-                    class_pred = row['predictions']
-                    cols[e%n_cols].audio(audio_file)
-                    cols[e%n_cols].markdown(f"*{audio_name}* ⇢ **{class_pred}**")
+                    top_prediction = row['top_predictions']
+                    cols[e % n_cols].audio(audio_file)
+                    cols[e % n_cols].markdown(f'"*{audio_name}*" ⇢ **{top_prediction}**')
 
                     # sleep 1s every row
-                    if e%n_cols == 0:
+                    if e % n_cols == 0:
                         time.sleep(1)
-
-
 
 
 if __name__ == "__main__":
