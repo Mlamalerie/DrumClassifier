@@ -1,7 +1,7 @@
 
 from scipy.signal import hilbert
 import numpy as np
-
+import streamlit as st
 import scipy
 from scipy.stats import skew
 import pandas as pd
@@ -71,7 +71,7 @@ def get_rms_log_stats(y, frame_length=RMS_FRAME_LENGTH, hop_length=HOP_LENGTH) -
 
 
 def get_zero_crossing_rate_stats(y, frame_length=ZCR_FRAME_LENGTH, hop_length=HOP_LENGTH) -> Dict[str, float]:
-    zcr = librosa.feature.zero_crossing_rate(y=y, frame_length=ZCR_FRAME_LENGTH, hop_length=HOP_LENGTH)
+    zcr = librosa.feature.zero_crossing_rate(y=y, frame_length=frame_length, hop_length=hop_length)
     loudest_frame = np.argmax(zcr)
     return {
         "zcr_sum": np.sum(zcr),
@@ -503,8 +503,12 @@ def task_extract_features(sound):
         return None
 
 
-def extract_features_from_dataset(dataset: pd.DataFrame, parallel_mode=True, n_workers=4) -> pd.DataFrame:
+def extract_features_from_dataset(dataset: pd.DataFrame, parallel_mode=True, n_workers=4, bool_streamlit = True) -> pd.DataFrame:
     lock = threading.Lock()
+
+    if bool_streamlit:
+        progress_text = "Operation in progress. Please wait."
+        my_bar_st = st.progress(0, text=progress_text)
 
     if parallel_mode:
         print("> Start processing sounds (parallel mode)")
@@ -513,11 +517,14 @@ def extract_features_from_dataset(dataset: pd.DataFrame, parallel_mode=True, n_w
 
         with ThreadPoolExecutor(max_workers=n_workers) as executor:
             futures = [executor.submit(task_extract_features, sound) for sound in sounds]
-
             for future in tqdm(as_completed(futures), total=len(futures)):
                 features = future.result()
                 if features is not None:
                     feature_dicts.append(features)
+                if bool_streamlit:
+                    with lock:
+                        my_bar_st.progress(len(feature_dicts) / len(dataset), text=progress_text)
+
 
         print("> End processing sounds (parallel mode).")
         print(f"> {len(feature_dicts)}/{len(dataset)} sounds processed.")

@@ -1,3 +1,4 @@
+import base64
 import os
 import zipfile
 import tempfile
@@ -5,7 +6,11 @@ import pandas as pd
 import numpy as np
 import streamlit as st
 from pydub import AudioSegment
+import glob
 from IPython.display import Audio
+
+import shutil
+
 import time
 import pickle
 from tools import get_all_audios_files, load_audio_file
@@ -74,7 +79,7 @@ def load_ml_model(model_path):
 
 RF_MODEL_PATH = './models/RandomForest data[aug=1, s=10291, s_per_class=[596,1283], n_feats=98, feat_select=0] 20230513_10.pkl'
 SVC_MODEL_PATH = './models/SVC data[aug=1, s=10291, s_per_class=[596,1283], n_feats=98, feat_select=0] 20230513_05.pkl'
-LGBM_MODEL_PATH = './models/LGBM data[aug=1, s=10291, s_per_class=[596,1283], n_feats=98, feat_select=0] 20230513_15.pkl'
+LGBM_MODEL_PATH = './models/LGBM data[aug=1, s=10291, s_per_class=[596,1283], n_feats=77, feat_select=1] 20230515_02.pkl'
 model_rf, scaler_rf, features_columns_rf = load_ml_model(RF_MODEL_PATH)
 model_svc, scaler_svc, features_columns_svc = load_ml_model(SVC_MODEL_PATH)
 model_lgbm, scaler_lgbm, features_columns_lgbm = load_ml_model(LGBM_MODEL_PATH)
@@ -119,11 +124,27 @@ def create_dataset_from_audio_files(audio_files: list):
     return dataset
 
 
+def make_archive(source, destination):
+    base = os.path.basename(destination)
+    name = base.split('.')[0]
+    format = base.split('.')[1]
+    archive_from = os.path.dirname(source)
+    archive_to = os.path.basename(source.strip(os.sep))
+    shutil.make_archive(name, format, archive_from, archive_to)
+    shutil.move('%s.%s' % (name, format), destination)
+
+    return destination
+
+
 def main():
     uploaded_file = st.file_uploader("Choose a ZIP file", type="zip")
 
     if uploaded_file is not None:
         with tempfile.TemporaryDirectory() as temp_dir:
+            # get the name of the uploaded file
+            uploaded_file_name = uploaded_file.name
+
+            # extract zip file
             with zipfile.ZipFile(uploaded_file, 'r') as zip_ref:
                 zip_ref.extractall(temp_dir)
 
@@ -158,7 +179,7 @@ def main():
                 dataset = create_dataset_from_audio_files(audios)
                 # add features to dataset
                 with st.spinner("Extracting features..."):
-                    dataset = extract_features_from_dataset(dataset)
+                    dataset = extract_features_from_dataset(dataset, bool_streamlit=True)
 
                 with st.expander("Show dataset"):
                     # display dataset
@@ -177,7 +198,7 @@ def main():
                     probabilities = model.predict_proba(X)  # get probabilities
 
                 # new code...
-                confidence_threshold = 0.6  # set your confidence threshold here
+                confidence_threshold = 0.75  # set your confidence threshold here
                 top_n = 2  # set the number of top predictions you want to show
 
                 # for each prediction, get the top 2 classes and their probabilities
@@ -196,25 +217,65 @@ def main():
 
                 # concatenate top_predictions to dataset
                 dataset['top_predictions'] = top_predictions
+                dataset['predictions'] = predictions
 
                 # display predictions in a grid
                 st.subheader("Predictions 🔮")
-                st.caption(f"Showing top {top_n} predictions with confidence > {confidence_threshold}")
-                st.caption(f"*file_name* ⇢ **top_prediction**")
 
-                n_cols = 2
-                cols = st.columns(n_cols)
-                for e, (idx_row, row) in enumerate(dataset.iterrows()):
+                with st.expander("Show predictions"):
+                    st.caption(f"Showing top {top_n} predictions with confidence > {confidence_threshold}")
+                    st.caption(f"*file_name* ⇢ **top_prediction**")
 
-                    audio_file = row['file_path']
-                    audio_name = row['file_name']
-                    top_prediction = row['top_predictions']
-                    cols[e % n_cols].audio(audio_file)
-                    cols[e % n_cols].markdown(f'"*{audio_name}*" ⇢ **{top_prediction}**')
+                    n_cols = 2
+                    cols = st.columns(n_cols)
+                    for e, (idx_row, row) in enumerate(dataset.iterrows()):
+                        audio_file = row['file_path']
+                        audio_name = row['file_name']
+                        top_prediction = row['top_predictions']
+                        cols[e % n_cols].audio(audio_file)
+                        cols[e % n_cols].markdown(f'"*{audio_name}*" ⇢ **{top_prediction}**')
 
-                    # sleep 1s every row
-                    if e % n_cols == 0:
-                        time.sleep(1)
+                st.subheader("Download 📥")
+                # buttons
+
+                # download dataset with predictions
+                with st.spinner("Downloading dataset with predictions..."):
+                    name_download = f"predictions - {uploaded_file_name}.csv"
+                    st.download_button(
+                        label="Download dataset with predictions",
+                        data=dataset.loc[:, ['file_name', 'predictions', 'top_predictions']].to_csv(index=False),
+                        file_name=name_download,
+                        mime="text/csv",
+                    )
+
+
+
+
+# Function to create classified directories
+def create_classified_directories(temp_dir, dataset):
+    # verify if temp_dir exists
+    if not os.path.exists(temp_dir):
+        raise ValueError(f"temp_dir {temp_dir} does not exist")
+    # create directories
+    class_dirs = {class_name: os.path.join(temp_dir, class_name) for class_name in dataset['predictions'].unique()}
+    for class_name, class_dir in class_dirs.items():
+        if not os.path.exists(class_dir):
+            os.makedirs(class_dir)
+
+    st.write(class_dirs)
+    for idx, row in dataset.iterrows():
+        shutil.copy2(row['file_path'], os.path.join(class_dirs[row['predictions']], os.path.basename(row['file_path'])))
+
+    return temp_dir
+
+
+# Functions to download files
+def get_binary_file_downloader_html(bin_file, file_label='File'):
+    with open(bin_file, 'rb') as f:
+        data = f.read()
+    bin_str = base64.b64encode(data).decode()
+    href = f'<a href="data:application/octet-stream;base64,{bin_str}" download="{os.path.basename(bin_file)}">{file_label}</a>'
+    return href
 
 
 if __name__ == "__main__":

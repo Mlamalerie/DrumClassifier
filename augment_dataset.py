@@ -83,7 +83,7 @@ MIN_FILTER_FREQ, MAX_FILTER_FREQ = 40, 1000
 
 # DATASET AUGMENTATIONS PARAMETERS
 
-TARGET_NUMBER_PER_CLASS = 600
+TARGET_NUMBER_PER_CLASS = 2000
 
 
 def augment_audio(y, sample_rate,
@@ -245,7 +245,9 @@ def generate_augmented_audio(orig_file_path: str, n_augmentations: int = 1, **kw
         # get augmented audio
         augmented_y, params_str = augment_audio(y=y, sample_rate=sr, **kwargs)
         # save augmented file
-        augmented_file_path = orig_file_path.replace(file_extension__, f"@augmented__{params_str}{file_extension__}")
+        now_str_time = datetime.now().strftime("%Y%m%d%H%M%S")
+        augmented_file_path = orig_file_path.replace(file_extension__,
+                                                     f"@augmented__{params_str}__{now_str_time}{file_extension__}")
 
         augmented_file_path = save_audio_file(augmented_file_path, augmented_y, sr)
 
