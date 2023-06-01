@@ -77,8 +77,8 @@ def load_ml_model(model_path):
     return model, scaler, features_columns
 
 
-RF_MODEL_PATH = './models/RandomForest data[aug=1, s=10291, s_per_class=[596,1283], n_feats=98, feat_select=0] 20230513_10.pkl'
-SVC_MODEL_PATH = './models/SVC data[aug=1, s=10291, s_per_class=[596,1283], n_feats=98, feat_select=0] 20230513_05.pkl'
+RF_MODEL_PATH = './models/RandomForest data[aug=1, s=10291, s_per_class=[596,1283], n_feats=77, feat_select=1] 20230514_04.pkl'
+SVC_MODEL_PATH = './models/SVC data[aug=1, s=10291, s_per_class=[596,1283], n_feats=77, feat_select=1] 20230514_15.pkl'
 LGBM_MODEL_PATH = './models/LGBM data[aug=1, s=10291, s_per_class=[596,1283], n_feats=77, feat_select=1] 20230515_02.pkl'
 model_rf, scaler_rf, features_columns_rf = load_ml_model(RF_MODEL_PATH)
 model_svc, scaler_svc, features_columns_svc = load_ml_model(SVC_MODEL_PATH)

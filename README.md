@@ -1,5 +1,5 @@
 <div align="center">
-  <a href="https://github.com/othneildrew/Best-README-Template">
+  <a href="www.google.fr">
     <img src="images/streamlit-mark-color.svg" alt="Logo" width="80" height="40">
   </a>
 <h1 align="center">DrumClassifier</h1>
@@ -7,20 +7,22 @@
   <p align="center">
     Use AI to classify percussive sounds !
     <br />
-    <a href="https://github.com/othneildrew/Best-README-Template"><strong>Demo Streamlit</strong></a>
+    <a href="www.google.fr"><strong>Demo Streamlit</strong></a>
 
   </p>
 
 </div>
 
-![ThumbnailPNG](images/GitHub_Thumbnail.png)
 
 ## About
 
-In this repository, you will find the code for my final year project at CY Tech. 
+In this repository, you will find the code for my final year project at CY Tech.
 
-The goal of this project is to classify percussive sounds using AI without use Deep Learning. 
-The dataset used is the [here](https://drive.google.com/drive/folders/1xdZt_hiaQ1yqI1Vgrc9BKETrCNc-1NyZ?usp=sharing) which contains 14 different classes of percussive sounds. 
+<img  style="width:100%;" src="images/GitHub_Thumbnail.png" alt="ThumbnailPNG" >
+
+
+The goal of this project is to classify percussive sounds using AI without use Deep Learning.
+The dataset used is the [here](https://drive.google.com/drive/folders/1xdZt_hiaQ1yqI1Vgrc9BKETrCNc-1NyZ?usp=sharing) which contains 14 different classes of percussive sounds.
 
 <p align="center">
 
@@ -31,15 +33,15 @@ The best model obtained is a LightGBM model with a 0.89 accuracy and a 0.88 F1-s
 Few models (LGBM, RF, SVC) are then saved and used in the "DrumClassifier" application to classify percussive sounds.
 
 
+
 ## Application
 
-### Description
+### Instructions
 
-...
-
-On the streamlit demo, you can generate a text by :
-
-1. **...** ...
+1. Upload your drum kit zip file.
+2. Select a model 🤖
+3. Click on the `Classify` button.
+4. Wait for the classification results to appear.
 
 
 ### Requirements
