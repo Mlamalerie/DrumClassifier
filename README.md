@@ -5,7 +5,7 @@
 <h1 align="center">DrumClassifier</h1>
 
   <p align="center">
-    Générateur de textes, produisant des phrases et des couplets de rap en français, en s'inspirant du style, de la structure et des thèmes abordés par les rappeurs français.
+    Use AI to classify percussive sounds !
     <br />
     <a href="https://github.com/othneildrew/Best-README-Template"><strong>Demo Streamlit</strong></a>
 
@@ -13,14 +13,22 @@
 
 </div>
 
-![ThumbnailPNG](https://raw.githubusercontent.com/aronmandrella/MastersThesis/main/GitHub_Thumbnail.png)
+![ThumbnailPNG](images/GitHub_Thumbnail.png)
 
 ## About
 
-The aim of the thesis was to find an artificial neural network that would provide high accuracy when used for classification of percussive sounds. Both regular neural networks and convolutional neural networks were tested. Tests were carried out with few various audio representation (various inputs), and with various model training approaches (dropout, batch normalization, stride, max-pool).
+In this repository, you will find the code for my final year project at CY Tech. 
 
-*
-* [📦 Output predictions (Google Drive)](https://drive.google.com/drive/folders/1CWwUyckJevgqcemdiRQTdpQhYnwwuz_g?usp=sharing)
+The goal of this project is to classify percussive sounds using AI without use Deep Learning. 
+The dataset used is the [here](https://drive.google.com/drive/folders/1xdZt_hiaQ1yqI1Vgrc9BKETrCNc-1NyZ?usp=sharing) which contains 14 different classes of percussive sounds. 
+
+<p align="center">
+
+<img src="images/20230514 Normalized confusion matrix - LGBM  data[aug=1, s=10291, s_per_class=[596,1283], n_feats=77, feat_select=1]  metrics[acc=0.914, f1=0.892].png" alt="matrix confusion" >
+
+</p>
+The best model obtained is a LightGBM model with a 0.89 accuracy and a 0.88 F1-score.
+Few models (LGBM, RF, SVC) are then saved and used in the "DrumClassifier" application to classify percussive sounds.
 
 
 ## Application
@@ -51,7 +59,7 @@ You should now see the application running 🚀 !
 
 ### Screenshots
 
-...
+![Screenshot](images/streamlit_screen2.png)
 
 
 ## Acknowledgments
