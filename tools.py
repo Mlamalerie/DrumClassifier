@@ -10,6 +10,10 @@ import librosa
 import soundfile as sf
 from glob import glob
 
+
+def flatten(l):
+    return [item for sublist in l for item in sublist]
+
 # get all audios files in the dataset (wav, mp3, ...) use glob
 def get_all_audios_files(dir_path, audio_extensions=[".wav", ".mp3", ".ogg", ".flac"]):
     files = []
