@@ -39,7 +39,7 @@ def change_all_sample_rate(target_sample_rate) -> list:
         file_extension = file_path.split('.')[-1]
 
         # Changer le chemin de sortie
-        output_path = file_path.replace(f".{file_extension}", f"_resampled.wav")
+        output_path = file_path.replace(f".{file_extension}", "_resampled.wav")
 
         # Enregistrer l'audio au format WAV
         save_audio(y_resampled, target_sample_rate, output_path)

@@ -27,9 +27,10 @@ def get_df_audio_files(dir_path, audio_extensions=[".wav", ".mp3", ".ogg", ".fla
     files = get_all_audios_files(dir_path, audio_extensions)
     # get file : path, name, extension and class (folder name)
     files_info = [get_file_info(file) for file in files]
-    df = pd.DataFrame(files_info, columns=["file_path", "file_name", "file_extension", "class"])
-
-    return df
+    return pd.DataFrame(
+        files_info,
+        columns=["file_path", "file_name", "file_extension", "class"],
+    )
 
 
 def add_split_column(df, test_size=0.2, random_state=123, grouping_column="class"):
@@ -56,9 +57,9 @@ def generate_dataset_csv(dir_path: str, output_csv_path: str, test_size: float =
 
     # print info df
 
-    print("> Dataset shape: {}".format(df.shape))
-    print("> Dataset columns: {}".format(df.columns))
-    print("> Dataset classes: {}".format(df["class"].unique()))
+    print(f"> Dataset shape: {df.shape}")
+    print(f"> Dataset columns: {df.columns}")
+    print(f'> Dataset classes: {df["class"].unique()}')
     print("> Dataset info:")
     # count the number of files per class and split
     print(df.groupby(["class", "split"]).count()["file_path"])
@@ -67,7 +68,7 @@ def generate_dataset_csv(dir_path: str, output_csv_path: str, test_size: float =
     df.to_csv(output_csv_path, index=False)
 
     # print output
-    print("> Saved to: {}".format(output_csv_path))
+    print(f"> Saved to: {output_csv_path}")
 
     return df
 

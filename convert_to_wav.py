@@ -16,7 +16,7 @@ def convert_to_wav(audio_files):
     # Définir une fonction pour la conversion d'un fichier audio
     def convert_file(audio_file):
         # Récupérer le nom du fichier sans l'extension pour le nom du fichier de sortie
-        output_file = os.path.splitext(audio_file)[0] + '.wav'
+        output_file = f'{os.path.splitext(audio_file)[0]}.wav'
 
         # Charger le fichier audio avec pydub
         audio = AudioSegment.from_file(audio_file)

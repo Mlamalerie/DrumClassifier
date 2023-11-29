@@ -31,11 +31,11 @@ def get_columns_by_prefix_(columns_list: list) -> dict:
     Returns:
         dict: Dictionnaire contenant les préfixes comme clés et les colonnes associées comme valeurs.
     """
-    prefixes = set([col.split('_')[0] for col in columns_list])
-    columns_by_prefix = {}
-    for prefix in prefixes:
-        columns_by_prefix[prefix] = [col for col in columns_list if col.startswith(prefix)]
-    return columns_by_prefix
+    prefixes = {col.split('_')[0] for col in columns_list}
+    return {
+        prefix: [col for col in columns_list if col.startswith(prefix)]
+        for prefix in prefixes
+    }
 
 
 def get_columns_starts_with(columns_list: list, prefix) -> dict:
@@ -78,14 +78,11 @@ def pad_signal(y: np.ndarray, target_length: int) -> np.ndarray:
     """
     len_y = len(y)
 
-    if len_y < target_length:
-        # Ajoute du padding pour que la longueur du signal soit égale à target_length
-        y_padded = np.pad(y, (0, target_length - len_y), 'constant')
-    else:
-        # Si la longueur du signal est déjà supérieure ou égale à target_length, on le retourne tel quel
-        y_padded = y
-
-    return y_padded
+    return (
+        np.pad(y, (0, target_length - len_y), 'constant')
+        if len_y < target_length
+        else y
+    )
 
 def load_audio_file(file_path: str, sr: int = SAMPLE_RATE) -> Tuple[np.ndarray, int]:
     if not os.path.exists(file_path):
@@ -126,13 +123,10 @@ def play_audio(file_path: str = None, sr=SAMPLE_RATE, y=None, title=None):
         # get extension
 
         ext = file_path.split('.')[-1]
-        # change file_path : keep only parent folder / file name
-
-        if ext in ['flac',"aif","aiff"]:
-            y, sr = load_audio_file(file_path, sr=sr)
-            return ipd.display(ipd.Audio(y, rate=sr))
-        else:
+        if ext not in ['flac', "aif", "aiff"]:
             return ipd.display(ipd.Audio(file_path, rate=sr))
+        y, sr = load_audio_file(file_path, sr=sr)
+        return ipd.display(ipd.Audio(y, rate=sr))
     elif y is not None:
         return ipd.display(ipd.Audio(y, rate=sr))
 

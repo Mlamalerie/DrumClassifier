@@ -178,7 +178,7 @@ def augment_audio(y, sample_rate,
             augmentations.append(
                 BandStopFilter(min_center_freq=min_filter_freq, max_center_freq=max_filter_freq, p=1.0))
 
-    if len(augmentations) == 0:
+    if not augmentations:
         return augment_audio(y, sample_rate)
 
     augmenter = Compose(augmentations)
@@ -241,7 +241,7 @@ def generate_augmented_audio(orig_file_path: str, n_augmentations: int = 1, **kw
 
     y, sr = load_audio_file(orig_file_path)
 
-    for i in range(n_augmentations):
+    for _ in range(n_augmentations):
         # get augmented audio
         augmented_y, params_str = augment_audio(y=y, sample_rate=sr, **kwargs)
         # save augmented file
@@ -265,7 +265,7 @@ def delete_augmented_files(folder_path: str):
     count = 0
     # get files containes "@augmented__" in folder (use glob)
     files_augmented = glob(os.path.join(folder_path, "**", "*@augmented__*"), recursive=True)
-    if len(files_augmented) == 0:
+    if not files_augmented:
         print(f"> No augmented files found in {folder_path}")
         return count
 
@@ -311,11 +311,14 @@ def task_augment_file_row(orig_file_path):
         augmented_y = pad_signal(augmented_y, target_length=N_FFT)
         features = extract_features(augmented_y, sr=SAMPLE_RATE)  # todo sr associated to file augmentation
 
-        # add features to row_result
-        row_dict = {"orig_file_path": orig_file_path, "file_path": augmented_file_path, "split": "train",
-                    "class": class_name, "is_augmented": 1, **features}
-
-        return row_dict
+        return {
+            "orig_file_path": orig_file_path,
+            "file_path": augmented_file_path,
+            "split": "train",
+            "class": class_name,
+            "is_augmented": 1,
+            **features,
+        }
     except Exception as e:
         print(f"! Error augmenting file {orig_file_path}: {e}")
         return None
@@ -364,7 +367,7 @@ def main():
 
     # ---------------------------------------------
 
-    if len(original_file_paths_to_augment) > 0:
+    if original_file_paths_to_augment:
         print()
 
         if ask_confirmation():

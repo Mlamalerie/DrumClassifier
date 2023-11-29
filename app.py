@@ -42,7 +42,7 @@ st.sidebar.success("This is a **beta** version of the app.")
 # =======
 # We need to set up session state via st.session_state so that app interactions don't reset the app.
 
-if not "ok_submit" in st.session_state:
+if "ok_submit" not in st.session_state:
     st.session_state.ok_submit = False
 
 
@@ -116,12 +116,12 @@ def create_dataset_from_audio_files(audio_files: list):
     file_path_series = pd.Series(audio_files)
     file_name_series = file_path_series.apply(lambda x: os.path.basename(x).split('.')[0])
 
-    dataset = pd.DataFrame({
-        'file_path': file_path_series,
-        'file_name': file_name_series,
-    })
-
-    return dataset
+    return pd.DataFrame(
+        {
+            'file_path': file_path_series,
+            'file_name': file_name_series,
+        }
+    )
 
 
 def make_archive(source, destination):
@@ -131,7 +131,7 @@ def make_archive(source, destination):
     archive_from = os.path.dirname(source)
     archive_to = os.path.basename(source.strip(os.sep))
     shutil.make_archive(name, format, archive_from, archive_to)
-    shutil.move('%s.%s' % (name, format), destination)
+    shutil.move(f'{name}.{format}', destination)
 
     return destination
 
@@ -224,7 +224,7 @@ def main():
 
                 with st.expander("Show predictions"):
                     st.caption(f"Showing top {top_n} predictions with confidence > {confidence_threshold}")
-                    st.caption(f"*file_name* ⇢ **top_prediction**")
+                    st.caption("*file_name* ⇢ **top_prediction**")
 
                     n_cols = 2
                     cols = st.columns(n_cols)
@@ -258,7 +258,7 @@ def create_classified_directories(temp_dir, dataset):
         raise ValueError(f"temp_dir {temp_dir} does not exist")
     # create directories
     class_dirs = {class_name: os.path.join(temp_dir, class_name) for class_name in dataset['predictions'].unique()}
-    for class_name, class_dir in class_dirs.items():
+    for class_dir in class_dirs.values():
         if not os.path.exists(class_dir):
             os.makedirs(class_dir)
 
@@ -274,8 +274,7 @@ def get_binary_file_downloader_html(bin_file, file_label='File'):
     with open(bin_file, 'rb') as f:
         data = f.read()
     bin_str = base64.b64encode(data).decode()
-    href = f'<a href="data:application/octet-stream;base64,{bin_str}" download="{os.path.basename(bin_file)}">{file_label}</a>'
-    return href
+    return f'<a href="data:application/octet-stream;base64,{bin_str}" download="{os.path.basename(bin_file)}">{file_label}</a>'
 
 
 if __name__ == "__main__":

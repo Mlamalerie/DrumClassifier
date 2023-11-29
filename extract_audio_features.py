@@ -164,10 +164,7 @@ def get_release_time(y, sr, threshold=0.9):
     # Recherche des indices où l'enveloppe tombe en dessous du seuil
     below_threshold_indices = np.where(y_env < threshold * np.max(y_env))[0]
 
-    # Calcul du temps de relâchement en secondes
-    release_time = below_threshold_indices[0] / float(sr)
-
-    return release_time
+    return below_threshold_indices[0] / float(sr)
 
 
 def get_log_release_time(y, sr, threshold=0.9):
@@ -214,10 +211,7 @@ def get_pitch(y, sr, fmin=20.0, fmax=2000):
     # Trouver l'index du maximum local dans la région d'intérêt
     i_peak = np.argmax(autocorr[i_min:i_max]) + i_min
 
-    # Convertir l'index en fréquence
-    f0 = float(sr) / i_peak
-
-    return f0
+    return float(sr) / i_peak
 
 
 def pitch_to_midi(pitch):
@@ -510,11 +504,11 @@ def extract_features_from_dataset(dataset: pd.DataFrame, parallel_mode=True, n_w
         progress_text = "Operation in progress. Please wait."
         my_bar_st = st.progress(0, text=progress_text)
 
+    feature_dicts = []
+
     if parallel_mode:
         print("> Start processing sounds (parallel mode)")
         sounds = dataset.itertuples()
-        feature_dicts = []
-
         with ThreadPoolExecutor(max_workers=n_workers) as executor:
             futures = [executor.submit(task_extract_features, sound) for sound in sounds]
             for future in tqdm(as_completed(futures), total=len(futures)):
@@ -540,8 +534,6 @@ def extract_features_from_dataset(dataset: pd.DataFrame, parallel_mode=True, n_w
 
     else:
         print("> Start processing sounds (sequential mode)")
-        feature_dicts = []
-
         # Iterate over the dataset and extract features
         for sound in tqdm(dataset.itertuples(), total=len(dataset)):
             y, sr = load_audio_file(sound.file_path, sr=SAMPLE_RATE)

@@ -59,10 +59,7 @@ def similarity(vector1: np.ndarray, vector2: np.ndarray, metric: str = "euclidea
     Compute similarity between two vectors using the specified metric. Use numpy functions.
     """
     if metric == "cosine":
-        sim = cosine_similarity(vector1, vector2)
-        return sim
-        # Normalize cosine similarity to [0, 1]
-        # return (sim + 1) / 2
+        return cosine_similarity(vector1, vector2)
     elif metric == "euclidean":
         dist = euclidean_distance(vector1, vector2)
         # Normalize euclidean distance to [0, 1] by dividing by the maximum possible distance
@@ -154,7 +151,11 @@ def main():
     print(f"> Nombre de columns: {len(df_drums.columns)}")
 
     ## FEATURES COLUMN
-    features_columns = [k for k, v in df_drums.dtypes.to_dict().items() if v == 'float64' or v == 'int64']
+    features_columns = [
+        k
+        for k, v in df_drums.dtypes.to_dict().items()
+        if v in ['float64', 'int64']
+    ]
     print("> Features columns: ", features_columns[:3], "...", features_columns[-3:])
     print(f"> Nombre de features: {len(features_columns)}")
     columns_by_prefix = get_columns_by_prefix_(features_columns)
@@ -188,11 +189,7 @@ def main():
     grouped_duplicates = duplicates_df.groupby(
         features_columns)  # Regroupez les lignes en double en fonction de leurs valeurs de features
 
-    # Créez une liste contenant des listes de file_paths pour chaque groupe de duplicatas
-    duplicate_groups = []
-    for _, group in grouped_duplicates:
-        duplicate_groups.append(list(group.index))
-
+    duplicate_groups = [list(group.index) for _, group in grouped_duplicates]
     # Affichez les groupes de duplicatas
     # for i, group in enumerate(duplicate_groups):
     #    print(f"# Duplicate Group {i + 1}:")
@@ -221,7 +218,7 @@ def main():
     print(f"> {len(set(duplicates_idx_to_delete))} lignes dupliquées supprimés")
 
     # Supprimez les autres fichiers audio du groupe de doublons du DataFrame
-    df_drums = df_drums.drop(file_path for file_path in duplicates_idx_to_delete)
+    df_drums = df_drums.drop(iter(duplicates_idx_to_delete))
 
     # cleaned_df contient maintenant les données sans les doublons indésirables
     print(
